@@ -124,26 +124,29 @@ Here's a screenshot of 3 terminal sessions showing k6, iftop and htop.
 
 The k6 settings listed below will unlock additional performance benefits when running large tests.
 
+### discardResponseBodies
+
+You can tell k6 to not process the body of the response by setting `discardResponseBodies` in the options object like this:
+
+```javascript
+export const options = {
+  discardResponseBodies: true,
+};
+```
+
+k6 by default loads the response body of the request into memory. This causes much higher memory consumption and often is completely unnecessary.
+If you need the response body for some requests you can set [Params.responseType](/javascript-api/k6-http/params).
+
 ### --compatibility-mode=base
 
-The most impactful option to improve k6 performance is to use [`--compatibility-mode=base`](/using-k6/k6-options/reference#compatibility-mode) to disable the internal [Babel](https://babeljs.io/) transpilation and run a k6 script written in ES5.1.
-
+The JavaScript virtual machine k6 uses doesn't support all modern JS syntax and features. In order to increase this support, k6 by default will run your script through an internal [Babel](https://babeljs.io/) transpilation step. This process uses some CPU and memory, so to avoid this penalty and slightly increase the performance you can disable it by using the `--compatibility-mode` option with the `base` value. For this to work, your script must be written in strict ECMAScript 5.1 mode.
 
 ```bash
-# compatibility-mode=base disables the Babel transpilation and the inclusion of corejs
+# compatibility-mode=base disables the Babel transpilation
 k6 run --compatibility-mode=base yourscript.es5.js
 ```
 
-> **Background**
->
-> Most k6 script examples and documentation are written in ES6+.
->
-> By default, k6 transpiles ES6+ code to ES5.1 using babel and loads corejs to enable commonly used APIs.
-> This works very well for 99% of use cases, but it adds significant overheard with large tests.
->
-> When running a ES5.1 script instead of the original ES6+ script, k6 can use about 50-85% of memory and significantly reduce the CPU load and startup time.
-
-You can use [webpack](https://webpack.js.org/) to transpile the scripts outside of k6. We have prepared a [webpack.config example](https://github.com/grafana/k6-hardware-benchmark/blob/master/webpack.config.js) that transforms ES6+ code to ES5.1 code for k6.
+You can also write your script with ES6+ features, and use [Webpack](https://webpack.js.org/) to transpile the scripts to ES5.1 outside of k6. We have prepared a [webpack.config example](https://github.com/grafana/k6-hardware-benchmark/blob/master/webpack.config.js) that transforms ES6+ code to ES5.1 code for k6.
 
 In the [k6-hardware-benchmark](https://github.com/grafana/k6-hardware-benchmark) repository, you can use it as follows:
 
@@ -158,18 +161,6 @@ yarn run to-es5 someplace/yourscript.js
 k6 run --compatibility-mode=base someplace/yourscript.es5.js
 ```
 
-### discardResponseBodies
-
-You can tell k6 to not process the body of the response by setting `discardResponseBodies` in the options object like this:
-
-```javascript
-export const options = {
-  discardResponseBodies: true,
-};
-```
-
-k6 by default loads the response body of the request into memory. This causes much higher memory consumption and often is completely unnecessary.
-If you need response body for some requests you can set [Params.responseType](/javascript-api/k6-http/params).
 
 ### --no-thresholds --no-summary
 
