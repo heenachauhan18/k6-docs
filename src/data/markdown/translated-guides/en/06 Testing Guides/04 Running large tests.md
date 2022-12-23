@@ -179,7 +179,7 @@ k6 run scripts/website.es5.js \
   --duration=10m \
   --compatibility-mode=base \
   --no-thresholds \
-  --no-summary \
+  --no-summary
 ```
 
 ### Remove unnecessary checks, groups and custom metrics
